@@ -14,7 +14,7 @@
       "tasks": [
         { "id": "0.1", "description": "Initialiser le projet Spring Boot 3 (Maven, Java 21) avec dépendances : Web, Data JPA, Security, Validation, PostgreSQL driver, Flyway. Vérifier que 'mvn spring-boot:run' démarre", "done": true },
         { "id": "0.2", "description": "Configurer un docker-compose.yml avec un service PostgreSQL pour le développement local", "done": true },
-        { "id": "0.3", "description": "Configurer application.yml avec profils 'dev' et 'test' (H2 en mémoire pour les tests), variables d'environnement pour DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET", "done": false },
+        { "id": "0.3", "description": "Configurer application.yml avec profils 'dev' et 'test' (H2 en mémoire pour les tests), variables d'environnement pour DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET", "done": true },
         { "id": "0.4", "description": "Mettre en place Flyway avec une première migration créant les tables de base (users). Vérifier 'mvn test' fonctionne avec un test de contexte Spring minimal", "done": false },
         { "id": "0.5", "description": "Configurer CORS pour accepter l'origine du frontend (variable d'env FRONTEND_ORIGIN, défaut http://localhost:5173)", "done": false },
         { "id": "0.6", "description": "Ajouter springdoc-openapi pour générer une documentation Swagger accessible sur /swagger-ui.html", "done": false }

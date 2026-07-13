@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: sahti-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+jwt:
+  secret: ${JWT_SECRET:change-me-in-production-please-use-a-real-secret}
+  expiration-ms: 3600000
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/sahti}
+    username: ${DB_USER:sahti}
+    password: ${DB_PASSWORD:sahti}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:sahti;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: false
+jwt:
+  secret: test-secret-for-tests-only
