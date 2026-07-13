@@ -1,0 +1,119 @@
+{
+  "project": "Sahti Backend — API Spring Boot",
+  "stack": "Java 21 + Spring Boot 3 + Spring Web + Spring Data JPA + Spring Security (JWT) + PostgreSQL + Flyway + Maven + JUnit 5 + Mockito + Spring Boot Test (Testcontainers ou H2 pour les tests)",
+  "scope": "Backend séparé consommé par le frontend React existant (repo distinct). Remplace localStorage par une vraie base + une vraie authentification + un vrai modèle d'abonnement.",
+  "notes_importantes": [
+    "Le vrai encaissement (Stripe, CMI, etc.) nécessite de vraies clés API secrètes que Ralph n'a pas et ne doit pas inventer. Le modèle d'abonnement est donc construit intégralement (entité Subscription, statuts, dates, endpoints) mais le déclenchement du changement de statut passe par un endpoint 'webhook' interne, exactement comme le ferait un vrai fournisseur de paiement en production — brancher un vrai fournisseur plus tard ne demandera qu'à appeler cet endpoint depuis leur webhook réel, pas à refaire le modèle.",
+    "Les contenus médicaux mockés (interactions, contre-indications, dosage, chat) restent des règles statiques comme côté frontend, avec un champ 'disclaimer' explicite renvoyé par chaque endpoint concerné.",
+    "CORS doit être configuré pour accepter l'origine du frontend React (http://localhost:5173 en dev, variable d'env en prod).",
+    "Toutes les données sensibles (mot de passe, secret JWT, URL de base de données) passent par des variables d'environnement, jamais en dur dans le code."
+  ],
+  "phases": [
+    {
+      "name": "Phase 0: Fondations",
+      "tasks": [
+        { "id": "0.1", "description": "Initialiser le projet Spring Boot 3 (Maven, Java 21) avec dépendances : Web, Data JPA, Security, Validation, PostgreSQL driver, Flyway. Vérifier que 'mvn spring-boot:run' démarre", "done": false },
+        { "id": "0.2", "description": "Configurer un docker-compose.yml avec un service PostgreSQL pour le développement local", "done": false },
+        { "id": "0.3", "description": "Configurer application.yml avec profils 'dev' et 'test' (H2 en mémoire pour les tests), variables d'environnement pour DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET", "done": false },
+        { "id": "0.4", "description": "Mettre en place Flyway avec une première migration créant les tables de base (users). Vérifier 'mvn test' fonctionne avec un test de contexte Spring minimal", "done": false },
+        { "id": "0.5", "description": "Configurer CORS pour accepter l'origine du frontend (variable d'env FRONTEND_ORIGIN, défaut http://localhost:5173)", "done": false },
+        { "id": "0.6", "description": "Ajouter springdoc-openapi pour générer une documentation Swagger accessible sur /swagger-ui.html", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 1: Authentification",
+      "tasks": [
+        { "id": "1.1", "description": "Entité User (id, email, password hashé, dateCreation) + migration Flyway. Repository JPA. Tests du repository", "done": false },
+        { "id": "1.2", "description": "Endpoint POST /api/auth/register : validation email/mot de passe, hash BCrypt, unicité de l'email. Tests d'intégration (succès + email déjà pris + mot de passe invalide)", "done": false },
+        { "id": "1.3", "description": "Endpoint POST /api/auth/login : vérification des identifiants, génération d'un JWT (access token). Tests (succès + mauvais mot de passe)", "done": false },
+        { "id": "1.4", "description": "Filtre Spring Security validant le JWT sur les routes protégées (/api/**), retour 401 si absent/invalide. Tests d'intégration sur une route protégée factice", "done": false },
+        { "id": "1.5", "description": "Endpoint GET /api/auth/me retournant les infos de l'utilisateur connecté à partir du JWT. Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 2: Famille & profils",
+      "tasks": [
+        { "id": "2.1", "description": "Entité FamilyMember (id, userId, nom, dateNaissance, groupeSanguin, allergies, antecedents) liée à User. Migration + repository. Tests", "done": false },
+        { "id": "2.2", "description": "Endpoints CRUD /api/family-members (scopés à l'utilisateur connecté via le JWT). Tests d'intégration complets (create/list/update/delete)", "done": false },
+        { "id": "2.3", "description": "Règle métier : limiter à 1 FamilyMember si l'utilisateur n'a pas d'abonnement Pro actif (dépend du service Subscription de la Phase 9 — prévoir une interface SubscriptionStatusProvider mockable en attendant). Tests de la limite (403 si dépassement en gratuit)", "done": false },
+        { "id": "2.4", "description": "Endpoint pour lister les 'aidants' associés à un profil famille (simple liste de noms/emails invités, sans vraie gestion multi-comptes complexe pour cette version). Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 3: Catalogue médicaments",
+      "tasks": [
+        { "id": "3.1", "description": "Entité MedicationCatalog (nom, dosage, prixPPV, notice simplifiée, estGenerique, medicamentRefId pour lier un générique à son référent). Migration + seed de ~20 entrées via migration Flyway (données fictives clairement documentées comme telles en commentaire SQL)", "done": false },
+        { "id": "3.2", "description": "Endpoint GET /api/medications/search?q=... recherche par nom (LIKE, insensible à la casse). Tests", "done": false },
+        { "id": "3.3", "description": "Endpoint GET /api/medications/{id}/generics retournant les génériques liés triés par prix croissant. Tests", "done": false },
+        { "id": "3.4", "description": "Endpoint POST /api/medications/cost-estimate : reçoit une liste d'ids + un taux de remboursement (AMO/CNSS/CNOPS), retourne total PPV, montant remboursé, reste à charge. Tests des calculs", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 4: Traitements & rappels",
+      "tasks": [
+        { "id": "4.1", "description": "Entité Prescription (familyMemberId, medicationCatalogId ou nom libre, dose, fréquence, horaires, quantitéRestante, dateFinEstimee) + migration + repository. Tests", "done": false },
+        { "id": "4.2", "description": "Endpoints CRUD /api/prescriptions scopés au family member (vérifier que le family member appartient bien à l'utilisateur connecté). Tests", "done": false },
+        { "id": "4.3", "description": "Entité DoseLog (prescriptionId, dateHeurePrevue, dateHeureConfirmee nullable) + endpoint POST /api/dose-logs/{id}/confirm. Tests", "done": false },
+        { "id": "4.4", "description": "Endpoint GET /api/prescriptions/{id}/observance retournant le taux hebdomadaire et le streak de jours consécutifs à partir des DoseLog. Tests des calculs", "done": false },
+        { "id": "4.5", "description": "Décrémenter quantitéRestante à chaque confirmation de dose ; endpoint GET /api/prescriptions/low-stock retournant les prescriptions sous un seuil. Tests", "done": false },
+        { "id": "4.6", "description": "Endpoint GET /api/prescriptions/renewal-due retournant les prescriptions dont dateFinEstimee est proche (paramètre de jours). Tests", "done": false },
+        { "id": "4.7", "description": "[Pro] Endpoint GET /api/prescriptions/{id}/history sans limite de période (vs un endpoint gratuit limité aux 7 derniers jours), protégé par le statut d'abonnement. Tests des deux comportements", "done": false },
+        { "id": "4.8", "description": "[Pro] Champ mode Ramadan sur Prescription (booléen + horaires Ftour/Shour) pris en compte dans le calcul des prochains rappels. Tests", "done": false },
+        { "id": "4.9", "description": "[Pro] Champ dateExpiration sur Prescription + endpoint GET /api/prescriptions/expiring-soon. Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 5: Constantes de santé (Pro)",
+      "tasks": [
+        { "id": "5.1", "description": "Entité HealthConstant (familyMemberId, type: TENSION/GLYCEMIE/POIDS/FREQUENCE_CARDIAQUE, valeur(s), date). Migration + repository. Tests", "done": false },
+        { "id": "5.2", "description": "Endpoints CRUD /api/health-constants filtrables par familyMemberId et type, protégés par abonnement Pro. Tests", "done": false },
+        { "id": "5.3", "description": "Endpoint GET /api/health-constants/{familyMemberId}/report agrégeant observance + constantes sur une période, au format JSON exploitable pour générer un PDF côté frontend. Tests du contenu", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 6: Sécurité médicale (règles statiques)",
+      "tasks": [
+        { "id": "6.1", "description": "Table statique InteractionRule (medicamentA, medicamentB, description) seedée par migration, avec commentaire précisant que ce sont des données de démonstration. Endpoint POST /api/safety/check-interactions recevant une liste de médicaments d'un profil, retournant les paires en conflit + un champ 'disclaimer'. Tests", "done": false },
+        { "id": "6.2", "description": "Table statique ContraindicationRule (medicament, condition: grossesse/allaitement/conduite, description). Endpoint POST /api/safety/check-contraindications. Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 7: Santé globale",
+      "tasks": [
+        { "id": "7.1", "description": "Entité Appointment (familyMemberId, medecin, spécialité, date, notes) + endpoints CRUD /api/appointments. Tests", "done": false },
+        { "id": "7.2", "description": "[Pro] Table statique du calendrier vaccinal marocain (VaccineSchedule: nom, ageEnMois) + entité VaccinationRecord (familyMemberId, vaccineScheduleId, fait: bool, date). Endpoints pour lister le calendrier applicable et marquer un vaccin fait. Tests", "done": false },
+        { "id": "7.3", "description": "[Pro] Entité AnalysisReminder (familyMemberId, nom, frequenceJours, derniereDate) + endpoint GET /api/analysis-reminders/due calculant la prochaine échéance. Tests", "done": false },
+        { "id": "7.4", "description": "Entité SymptomEntry (familyMemberId, date, texte, intensite) + endpoints CRUD /api/symptoms. Tests", "done": false },
+        { "id": "7.5", "description": "Endpoint GET /api/family-members/{id}/emergency-record retournant groupe sanguin, allergies, antécédents (accessible sans naviguer dans tout le reste, pour un usage d'urgence). Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 8: Assistant (simulé, avec disclaimer)",
+      "tasks": [
+        { "id": "8.1", "description": "[Pro] Endpoint POST /api/assistant/chat : matching de mots-clés contre un jeu de règles statique, retourne une réponse pré-écrite + champ 'disclaimer' obligatoire. Tests des règles de matching", "done": false },
+        { "id": "8.2", "description": "[Pro] Endpoint GET /api/assistant/explain/{medicationId} retournant une explication vulgarisée pré-écrite issue du catalogue + disclaimer. Tests", "done": false },
+        { "id": "8.3", "description": "[Pro] Endpoint POST /api/assistant/dosage-advice (âge, medicationId) retournant un conseil générique mocké + disclaimer fort explicite. Tests", "done": false },
+        { "id": "8.4", "description": "[Pro] Endpoint POST /api/assistant/missed-dose-advice (medicationId, tempsEcoule) retournant un conseil générique mocké + disclaimer fort. Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 9: Abonnement Pro",
+      "tasks": [
+        { "id": "9.1", "description": "Entité Subscription (userId, statut: NONE/ACTIVE/CANCELLED/EXPIRED, dateDebut, dateFin, plan) + migration + repository. Tests", "done": false },
+        { "id": "9.2", "description": "Service SubscriptionService exposant isProActive(userId): boolean, utilisé pour brancher les ProGate des phases précédentes (remplacer les interfaces mockées par ce vrai service). Tests unitaires du service (actif, expiré, annulé, jamais souscrit)", "done": false },
+        { "id": "9.3", "description": "Endpoint GET /api/subscription/status retournant le statut courant de l'utilisateur connecté. Tests", "done": false },
+        { "id": "9.4", "description": "Endpoint interne POST /api/subscription/webhook (protégé par une clé partagée en en-tête, pas par le JWT utilisateur) simulant ce qu'un vrai fournisseur de paiement enverrait : active/renouvelle/annule un abonnement pour un userId donné. Documenter clairement dans le code que c'est le point d'intégration prévu pour un vrai fournisseur (Stripe, CMI...) plus tard. Tests", "done": false },
+        { "id": "9.5", "description": "Vérifier/corriger que toutes les routes Pro des phases précédentes utilisent bien SubscriptionService.isProActive() et retournent 403 avec un message clair si inactif. Tests de régression sur chaque route Pro", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 10: Finitions",
+      "tasks": [
+        { "id": "10.1", "description": "Vérifier la documentation Swagger : chaque endpoint a une description et les schémas de requête/réponse sont corrects", "done": false },
+        { "id": "10.2", "description": "Ajouter une gestion centralisée des erreurs (@ControllerAdvice) avec des réponses JSON cohérentes (code, message) pour 400/401/403/404/500", "done": false },
+        { "id": "10.3", "description": "Écrire le README.md : description, prérequis (Docker pour Postgres), lancement local, variables d'environnement, comment lancer les tests, note sur le webhook d'abonnement simulé", "done": false },
+        { "id": "10.4", "description": "Vérifier que 'mvn test' et 'mvn package' passent sans erreur", "done": false }
+      ]
+    }
+  ]
+}
