@@ -12,7 +12,7 @@
     {
       "name": "Phase 0: Fondations",
       "tasks": [
-        { "id": "0.1", "description": "Initialiser le projet Spring Boot 3 (Maven, Java 21) avec dépendances : Web, Data JPA, Security, Validation, PostgreSQL driver, Flyway. Vérifier que 'mvn spring-boot:run' démarre", "done": false },
+        { "id": "0.1", "description": "Initialiser le projet Spring Boot 3 (Maven, Java 21) avec dépendances : Web, Data JPA, Security, Validation, PostgreSQL driver, Flyway. Vérifier que 'mvn spring-boot:run' démarre", "done": true },
         { "id": "0.2", "description": "Configurer un docker-compose.yml avec un service PostgreSQL pour le développement local", "done": false },
         { "id": "0.3", "description": "Configurer application.yml avec profils 'dev' et 'test' (H2 en mémoire pour les tests), variables d'environnement pour DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET", "done": false },
         { "id": "0.4", "description": "Mettre en place Flyway avec une première migration créant les tables de base (users). Vérifier 'mvn test' fonctionne avec un test de contexte Spring minimal", "done": false },
