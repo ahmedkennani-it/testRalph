@@ -1,5 +1,7 @@
 package com.sahti.backend.controller;
 
+import com.sahti.backend.dto.LoginRequest;
+import com.sahti.backend.dto.LoginResponse;
 import com.sahti.backend.dto.RegisterRequest;
 import com.sahti.backend.dto.UserResponse;
 import com.sahti.backend.entity.User;
@@ -26,5 +28,10 @@ public class AuthController {
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         User user = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
