@@ -53,7 +53,11 @@ public class FamilyMemberService {
         familyMemberRepository.delete(member);
     }
 
-    private FamilyMember getOwnedOrThrow(Long userId, Long id) {
+    /**
+     * Looks up a family member and verifies it belongs to the given user, for reuse by any
+     * other service scoping data to a familyMemberId (prescriptions, health constants, etc.).
+     */
+    public FamilyMember getOwnedOrThrow(Long userId, Long id) {
         FamilyMember member = familyMemberRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profil famille introuvable"));
         if (!member.getUserId().equals(userId)) {
