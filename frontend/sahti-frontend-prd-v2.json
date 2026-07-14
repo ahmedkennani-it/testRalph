@@ -1,0 +1,103 @@
+{
+  "project": "Sahti Frontend — Web MVP branché sur le backend Spring",
+  "stack": "React 18 + Vite + TypeScript + Vitest + React Testing Library + react-router-dom + axios",
+  "supersedes": "sahti-prd.json (v1, localStorage). Cette version consomme l'API définie dans sahti-backend-prd.json.",
+  "notes_importantes": [
+    "Toute donnée métier (profils famille, prescriptions, constantes, etc.) vit désormais côté backend. Le state local React ne sert que de cache d'affichage (React Query ou simple useState + refetch), plus de persistance dans localStorage pour ces données.",
+    "Seul le JWT est stocké côté client (localStorage ou cookie — choisir localStorage pour simplifier, avec un commentaire notant le compromis XSS vs simplicité).",
+    "L'URL du backend est configurable via la variable d'environnement VITE_API_BASE_URL (fichier .env, défaut http://localhost:8080).",
+    "Le statut Pro n'est plus un toggle local : il vient de GET /api/subscription/status. Pour activer/désactiver Pro en développement, utiliser l'endpoint webhook du backend (POST /api/subscription/webhook), pas un mock frontend.",
+    "Les bandeaux disclaimer sur le contenu médical mocké restent obligatoires ; le texte du disclaimer est maintenant renvoyé par le backend dans chaque réponse concernée — l'afficher tel quel plutôt que de le coder en dur côté frontend."
+  ],
+  "phases": [
+    {
+      "name": "Phase 0: Fondations",
+      "tasks": [
+        { "id": "0.1", "description": "Initialiser Vite + React + TypeScript, configurer Vitest + React Testing Library + jsdom", "done": true },
+        { "id": "0.2", "description": "Installer react-router-dom, créer la structure de navigation incluant les routes publiques /login /register et les routes protégées (Dashboard, Traitements, Famille, Constantes, Sécurité, Assistant, Médicaments & Prix, Santé, Paramètres)", "done": false },
+        { "id": "0.3", "description": "Créer le client HTTP (axios instance) lisant VITE_API_BASE_URL, avec intercepteur ajoutant automatiquement 'Authorization: Bearer <jwt>' et redirigeant vers /login sur une réponse 401", "done": false },
+        { "id": "0.4", "description": "Créer AuthContext (login, register, logout, user courant, jwt) persistant le JWT en localStorage. Tests du contexte (login réussi, échec, logout)", "done": false },
+        { "id": "0.5", "description": "Écrans Login et Register consommant POST /api/auth/login et /api/auth/register, gestion des erreurs (email déjà pris, mauvais mot de passe). Tests", "done": false },
+        { "id": "0.6", "description": "Composant ProtectedRoute redirigeant vers /login si non authentifié. Tests", "done": false },
+        { "id": "0.7", "description": "Hook useSubscriptionStatus() appelant GET /api/subscription/status (avec cache court), et composant ProGate réutilisable bloquant l'accès si non Pro, avec CTA expliquant qu'un vrai abonnement sera branché plus tard", "done": false },
+        { "id": "0.8", "description": "Définir les types TypeScript des DTOs échangés avec le backend (FamilyMember, Prescription, DoseLog, HealthConstant, Appointment, etc.) en miroir des réponses de l'API", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 1: Famille & profils",
+      "tasks": [
+        { "id": "1.1", "description": "Écran de gestion des profils famille : liste (GET /api/family-members), création (POST), édition (PUT), suppression (DELETE). Gérer l'erreur 403 de limite gratuite en affichant un CTA Pro. Tests (mock des appels API)", "done": false },
+        { "id": "1.2", "description": "Sélecteur de profil actif accessible depuis toutes les pages (persisté en state global, pas besoin d'appel serveur à chaque changement)", "done": false },
+        { "id": "1.3", "description": "[Pro] Écran des aidants associés à un profil (GET/POST sur l'endpoint aidants du backend). Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 2: Traitements & rappels",
+      "tasks": [
+        { "id": "2.1", "description": "Formulaire d'ajout de prescription pour le profil actif (POST /api/prescriptions). Tests de validation et de l'appel API", "done": false },
+        { "id": "2.2", "description": "Liste des prescriptions du profil actif (GET /api/prescriptions?familyMemberId=...) avec édition/suppression. Tests", "done": false },
+        { "id": "2.3", "description": "Rappels : timer client qui compare l'heure courante aux horaires des prescriptions actives, déclenche Notification API + SpeechSynthesis, et bouton de confirmation appelant POST /api/dose-logs/{id}/confirm. Tests du déclenchement (mock timer/API)", "done": false },
+        { "id": "2.4", "description": "Affichage du taux d'observance et du streak à partir de GET /api/prescriptions/{id}/observance. Tests", "done": false },
+        { "id": "2.5", "description": "Alerte de stock bas à partir de GET /api/prescriptions/low-stock, affichée dans le tableau de bord. Tests", "done": false },
+        { "id": "2.6", "description": "Alerte de renouvellement à partir de GET /api/prescriptions/renewal-due. Tests", "done": false },
+        { "id": "2.7", "description": "[Pro] Écran d'historique complet via GET /api/prescriptions/{id}/history, avec repli sur un aperçu limité si 403 (non Pro). Tests des deux cas", "done": false },
+        { "id": "2.8", "description": "[Pro] Toggle mode Ramadan sur une prescription (PATCH), avec configuration des horaires Ftour/Shour. Tests", "done": false },
+        { "id": "2.9", "description": "[Pro] Alerte péremption à partir de GET /api/prescriptions/expiring-soon. Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 3: Constantes de santé (Pro)",
+      "tasks": [
+        { "id": "3.1", "description": "[Pro] Écran de saisie et de courbe pour chaque type de constante (tension, glycémie, poids/IMC, fréquence cardiaque) via CRUD sur /api/health-constants. Tests par type", "done": false },
+        { "id": "3.2", "description": "[Pro] Écran rapport médecin : appel GET /api/health-constants/{familyMemberId}/report, mise en page imprimable (window.print()). Tests du rendu à partir d'une réponse mockée", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 4: Sécurité médicale",
+      "tasks": [
+        { "id": "4.1", "description": "[Pro] Écran d'analyse des interactions : envoie la liste des médicaments du profil actif à POST /api/safety/check-interactions, affiche les conflits + le disclaimer renvoyé par l'API. Tests", "done": false },
+        { "id": "4.2", "description": "[Pro] Écran des contre-indications : POST /api/safety/check-contraindications avec le profil (grossesse/allaitement/conduite) + affichage du disclaimer. Tests", "done": false },
+        { "id": "4.3", "description": "Affichage de la notice simplifiée d'un médicament à partir des données déjà renvoyées par la recherche du catalogue (Phase 6). Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 5: Assistant (avec disclaimer)",
+      "tasks": [
+        { "id": "5.1", "description": "[Pro] Interface de chat consommant POST /api/assistant/chat, affichage systématique du champ disclaimer retourné. Tests", "done": false },
+        { "id": "5.2", "description": "[Pro] Écran d'explication d'ordonnance via GET /api/assistant/explain/{medicationId}. Tests", "done": false },
+        { "id": "5.3", "description": "[Pro] Formulaire de dosage enfant/senior via POST /api/assistant/dosage-advice, disclaimer bien visible et explicite. Tests", "done": false },
+        { "id": "5.4", "description": "[Pro] Formulaire dose oubliée via POST /api/assistant/missed-dose-advice, disclaimer bien visible. Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 6: Médicaments & Prix",
+      "tasks": [
+        { "id": "6.1", "description": "Barre de recherche médicament avec debounce, appelant GET /api/medications/search. Tests", "done": false },
+        { "id": "6.2", "description": "Affichage des génériques via GET /api/medications/{id}/generics. Tests", "done": false },
+        { "id": "6.3", "description": "Calculateur de coût d'ordonnance : sélection multiple + choix du taux de remboursement, appel POST /api/medications/cost-estimate. Tests", "done": false },
+        { "id": "6.4", "description": "[Pro] Suivi des dépenses santé mensuelles à partir de l'historique des coûts d'ordonnance saisis (endpoint à confirmer côté backend si besoin d'un endpoint d'agrégation dédié ; sinon agréger côté frontend à partir des ordonnances existantes). Tests", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 7: Santé globale",
+      "tasks": [
+        { "id": "7.1", "description": "Pharmacies de garde : géolocalisation navigateur + liste mock de pharmacies (peut rester côté frontend, données statiques, pas besoin d'endpoint backend dédié pour cette version). Tests du calcul de distance", "done": false },
+        { "id": "7.2", "description": "Agenda médical via CRUD /api/appointments. Tests", "done": false },
+        { "id": "7.3", "description": "[Pro] Calendrier vaccinal enfants via les endpoints VaccineSchedule/VaccinationRecord du backend. Tests", "done": false },
+        { "id": "7.4", "description": "[Pro] Rappels d'analyses via /api/analysis-reminders. Tests", "done": false },
+        { "id": "7.5", "description": "Journal de symptômes via CRUD /api/symptoms. Tests", "done": false },
+        { "id": "7.6", "description": "Écran d'urgence /urgence via GET /api/family-members/{id}/emergency-record, accessible même en cas de connexion lente (squelette de chargement rapide)", "done": false }
+      ]
+    },
+    {
+      "name": "Phase 8: Finitions",
+      "tasks": [
+        { "id": "8.1", "description": "Gestion cohérente des états de chargement et d'erreur réseau sur tous les écrans (spinner, message d'erreur, retry)", "done": false },
+        { "id": "8.2", "description": "Harmoniser la navigation et vérifier le responsive mobile pour chaque module", "done": false },
+        { "id": "8.3", "description": "Fichier .env.example documentant VITE_API_BASE_URL", "done": false },
+        { "id": "8.4", "description": "Mettre à jour le README.md : description, prérequis (backend Spring lancé en parallèle), variables d'environnement, installation, tests", "done": false },
+        { "id": "8.5", "description": "Vérifier que npm run build compile sans erreur TypeScript et que tous les tests (npm run test) passent", "done": false }
+      ]
+    }
+  ]
+}
