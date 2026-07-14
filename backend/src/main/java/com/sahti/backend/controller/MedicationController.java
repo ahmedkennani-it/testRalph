@@ -3,6 +3,7 @@ package com.sahti.backend.controller;
 import com.sahti.backend.dto.MedicationCatalogResponse;
 import com.sahti.backend.service.MedicationCatalogService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,13 @@ public class MedicationController {
     @GetMapping("/search")
     public List<MedicationCatalogResponse> search(@RequestParam("q") String query) {
         return medicationCatalogService.search(query).stream()
+                .map(MedicationCatalogResponse::from)
+                .toList();
+    }
+
+    @GetMapping("/{id}/generics")
+    public List<MedicationCatalogResponse> generics(@PathVariable Long id) {
+        return medicationCatalogService.getGenerics(id).stream()
                 .map(MedicationCatalogResponse::from)
                 .toList();
     }
