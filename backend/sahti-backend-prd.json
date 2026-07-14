@@ -26,7 +26,7 @@
         { "id": "1.1", "description": "Entité User (id, email, password hashé, dateCreation) + migration Flyway. Repository JPA. Tests du repository", "done": true },
         { "id": "1.2", "description": "Endpoint POST /api/auth/register : validation email/mot de passe, hash BCrypt, unicité de l'email. Tests d'intégration (succès + email déjà pris + mot de passe invalide)", "done": true },
         { "id": "1.3", "description": "Endpoint POST /api/auth/login : vérification des identifiants, génération d'un JWT (access token). Tests (succès + mauvais mot de passe)", "done": true },
-        { "id": "1.4", "description": "Filtre Spring Security validant le JWT sur les routes protégées (/api/**), retour 401 si absent/invalide. Tests d'intégration sur une route protégée factice", "done": false },
+        { "id": "1.4", "description": "Filtre Spring Security validant le JWT sur les routes protégées (/api/**), retour 401 si absent/invalide. Tests d'intégration sur une route protégée factice", "done": true },
         { "id": "1.5", "description": "Endpoint GET /api/auth/me retournant les infos de l'utilisateur connecté à partir du JWT. Tests", "done": false }
       ]
     },
