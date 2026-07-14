@@ -1,9 +1,14 @@
 package com.sahti.backend.controller;
 
+import com.sahti.backend.dto.CostEstimateRequest;
+import com.sahti.backend.dto.CostEstimateResponse;
 import com.sahti.backend.dto.MedicationCatalogResponse;
 import com.sahti.backend.service.MedicationCatalogService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,5 +37,10 @@ public class MedicationController {
         return medicationCatalogService.getGenerics(id).stream()
                 .map(MedicationCatalogResponse::from)
                 .toList();
+    }
+
+    @PostMapping("/cost-estimate")
+    public CostEstimateResponse costEstimate(@Valid @RequestBody CostEstimateRequest request) {
+        return medicationCatalogService.estimateCost(request);
     }
 }
