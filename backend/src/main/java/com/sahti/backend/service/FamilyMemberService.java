@@ -12,10 +12,15 @@ import java.util.List;
 @Service
 public class FamilyMemberService {
 
-    private final FamilyMemberRepository familyMemberRepository;
+    private static final int FREE_TIER_MAX_FAMILY_MEMBERS = 1;
 
-    public FamilyMemberService(FamilyMemberRepository familyMemberRepository) {
+    private final FamilyMemberRepository familyMemberRepository;
+    private final SubscriptionStatusProvider subscriptionStatusProvider;
+
+    public FamilyMemberService(FamilyMemberRepository familyMemberRepository,
+                                SubscriptionStatusProvider subscriptionStatusProvider) {
         this.familyMemberRepository = familyMemberRepository;
+        this.subscriptionStatusProvider = subscriptionStatusProvider;
     }
 
     public List<FamilyMember> list(Long userId) {
@@ -23,6 +28,11 @@ public class FamilyMemberService {
     }
 
     public FamilyMember create(Long userId, FamilyMemberRequest request) {
+        if (!subscriptionStatusProvider.isProActive(userId)
+                && familyMemberRepository.countByUserId(userId) >= FREE_TIER_MAX_FAMILY_MEMBERS) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Limite atteinte : passez à l'abonnement Pro pour ajouter plus d'un profil famille");
+        }
         FamilyMember member = new FamilyMember(userId, request.getNom(), request.getDateNaissance(),
                 request.getGroupeSanguin(), request.getAllergies(), request.getAntecedents());
         return familyMemberRepository.save(member);

@@ -35,7 +35,7 @@
       "tasks": [
         { "id": "2.1", "description": "Entité FamilyMember (id, userId, nom, dateNaissance, groupeSanguin, allergies, antecedents) liée à User. Migration + repository. Tests", "done": true },
         { "id": "2.2", "description": "Endpoints CRUD /api/family-members (scopés à l'utilisateur connecté via le JWT). Tests d'intégration complets (create/list/update/delete)", "done": true },
-        { "id": "2.3", "description": "Règle métier : limiter à 1 FamilyMember si l'utilisateur n'a pas d'abonnement Pro actif (dépend du service Subscription de la Phase 9 — prévoir une interface SubscriptionStatusProvider mockable en attendant). Tests de la limite (403 si dépassement en gratuit)", "done": false },
+        { "id": "2.3", "description": "Règle métier : limiter à 1 FamilyMember si l'utilisateur n'a pas d'abonnement Pro actif (dépend du service Subscription de la Phase 9 — prévoir une interface SubscriptionStatusProvider mockable en attendant). Tests de la limite (403 si dépassement en gratuit)", "done": true },
         { "id": "2.4", "description": "Endpoint pour lister les 'aidants' associés à un profil famille (simple liste de noms/emails invités, sans vraie gestion multi-comptes complexe pour cette version). Tests", "done": false }
       ]
     },
