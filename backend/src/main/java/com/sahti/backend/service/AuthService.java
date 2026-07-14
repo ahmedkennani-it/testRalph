@@ -42,4 +42,9 @@ public class AuthService {
         String token = jwtService.generateToken(user.getId(), user.getEmail());
         return new LoginResponse(token, jwtService.getExpirationMs());
     }
+
+    public User getCurrentUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur introuvable"));
+    }
 }
