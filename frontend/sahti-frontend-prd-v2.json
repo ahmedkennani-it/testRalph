@@ -14,7 +14,7 @@
       "name": "Phase 0: Fondations",
       "tasks": [
         { "id": "0.1", "description": "Initialiser Vite + React + TypeScript, configurer Vitest + React Testing Library + jsdom", "done": true },
-        { "id": "0.2", "description": "Installer react-router-dom, créer la structure de navigation incluant les routes publiques /login /register et les routes protégées (Dashboard, Traitements, Famille, Constantes, Sécurité, Assistant, Médicaments & Prix, Santé, Paramètres)", "done": false },
+        { "id": "0.2", "description": "Installer react-router-dom, créer la structure de navigation incluant les routes publiques /login /register et les routes protégées (Dashboard, Traitements, Famille, Constantes, Sécurité, Assistant, Médicaments & Prix, Santé, Paramètres)", "done": true },
         { "id": "0.3", "description": "Créer le client HTTP (axios instance) lisant VITE_API_BASE_URL, avec intercepteur ajoutant automatiquement 'Authorization: Bearer <jwt>' et redirigeant vers /login sur une réponse 401", "done": false },
         { "id": "0.4", "description": "Créer AuthContext (login, register, logout, user courant, jwt) persistant le JWT en localStorage. Tests du contexte (login réussi, échec, logout)", "done": false },
         { "id": "0.5", "description": "Écrans Login et Register consommant POST /api/auth/login et /api/auth/register, gestion des erreurs (email déjà pris, mauvais mot de passe). Tests", "done": false },
