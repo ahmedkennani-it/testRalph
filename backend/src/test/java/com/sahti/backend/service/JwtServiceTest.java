@@ -24,7 +24,12 @@ class JwtServiceTest {
     @Test
     void rejectsTamperedToken() {
         String token = jwtService.generateToken(1L, "user@example.com");
-        String tampered = token.substring(0, token.length() - 1) + (token.endsWith("a") ? "b" : "a");
+        // Flip a character well inside the signature segment: the very last base64url
+        // character can sometimes decode to the same signature bytes (padding bits),
+        // which would make this test flaky.
+        int index = token.length() - 5;
+        char replacement = token.charAt(index) == 'A' ? 'B' : 'A';
+        String tampered = token.substring(0, index) + replacement + token.substring(index + 1);
 
         assertThatThrownBy(() -> jwtService.parseClaims(tampered)).isInstanceOf(JwtException.class);
     }
