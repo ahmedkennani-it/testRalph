@@ -51,7 +51,7 @@
     {
       "name": "Phase 4: Traitements & rappels",
       "tasks": [
-        { "id": "4.1", "description": "Entité Prescription (familyMemberId, medicationCatalogId ou nom libre, dose, fréquence, horaires, quantitéRestante, dateFinEstimee) + migration + repository. Tests", "done": false },
+        { "id": "4.1", "description": "Entité Prescription (familyMemberId, medicationCatalogId ou nom libre, dose, fréquence, horaires, quantitéRestante, dateFinEstimee) + migration + repository. Tests", "done": true },
         { "id": "4.2", "description": "Endpoints CRUD /api/prescriptions scopés au family member (vérifier que le family member appartient bien à l'utilisateur connecté). Tests", "done": false },
         { "id": "4.3", "description": "Entité DoseLog (prescriptionId, dateHeurePrevue, dateHeureConfirmee nullable) + endpoint POST /api/dose-logs/{id}/confirm. Tests", "done": false },
         { "id": "4.4", "description": "Endpoint GET /api/prescriptions/{id}/observance retournant le taux hebdomadaire et le streak de jours consécutifs à partir des DoseLog. Tests des calculs", "done": false },
