@@ -8,6 +8,10 @@ jwt:
   secret: ${JWT_SECRET:change-me-in-production-please-use-a-real-secret}
   expiration-ms: 3600000
 
+app:
+  cors:
+    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+
 ---
 spring:
   config:
