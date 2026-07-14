@@ -42,7 +42,7 @@
     {
       "name": "Phase 3: Catalogue médicaments",
       "tasks": [
-        { "id": "3.1", "description": "Entité MedicationCatalog (nom, dosage, prixPPV, notice simplifiée, estGenerique, medicamentRefId pour lier un générique à son référent). Migration + seed de ~20 entrées via migration Flyway (données fictives clairement documentées comme telles en commentaire SQL)", "done": false },
+        { "id": "3.1", "description": "Entité MedicationCatalog (nom, dosage, prixPPV, notice simplifiée, estGenerique, medicamentRefId pour lier un générique à son référent). Migration + seed de ~20 entrées via migration Flyway (données fictives clairement documentées comme telles en commentaire SQL)", "done": true },
         { "id": "3.2", "description": "Endpoint GET /api/medications/search?q=... recherche par nom (LIKE, insensible à la casse). Tests", "done": false },
         { "id": "3.3", "description": "Endpoint GET /api/medications/{id}/generics retournant les génériques liés triés par prix croissant. Tests", "done": false },
         { "id": "3.4", "description": "Endpoint POST /api/medications/cost-estimate : reçoit une liste d'ids + un taux de remboursement (AMO/CNSS/CNOPS), retourne total PPV, montant remboursé, reste à charge. Tests des calculs", "done": false }
